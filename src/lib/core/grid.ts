@@ -10,8 +10,11 @@ export class Grid {
     [-1, -1], [1, -1], [1, 1], [-1, 1],
   ];
 
-  constructor(private readonly size: number) {
-    this.board = Grid.generateInitialBoard(size);
+  constructor(
+    private readonly width: number,
+    private readonly height: number,
+  ) {
+    this.board = Grid.generateInitialBoard(width, height);
   }
 
   public getBoard() {
@@ -19,19 +22,19 @@ export class Grid {
   }
 
   public resetBoard() {
-    this.board = Grid.generateInitialBoard(this.size);
+    this.board = Grid.generateInitialBoard(this.width, this.height);
     return this.getBoard();
   }
 
   public processNextGenerationGrid(): void {
-    const nextGenerationGrid = Grid.generateEmptyBoard(this.size);
+    const nextGenerationGrid = Grid.generateEmptyBoard(this.width, this.height);
 
-    for (let row = 0; row < this.board.length; ++row) {
+    for (let row = 0; row < this.height; ++row) {
       const cells = this.board[row];
 
       assert(Array.isArray(cells));
 
-      for (let col = 0; col < cells.length; ++col) {
+      for (let col = 0; col < this.width; ++col) {
         const newStateOfCell = this.getNewStateOfCell(
           col,
           row,
@@ -94,20 +97,20 @@ export class Grid {
 
   // TODO(fcasibu): implement wrapping
   private isWithinBounds(x: number, y: number) {
-    return x >= 0 && x < this.size && y >= 0 && y < this.size;
+    return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
-  private static generateInitialBoard(size: number): Board {
-    return Array.from({ length: size }, () =>
-      Array.from({ length: size }, () =>
+  private static generateInitialBoard(width: number, height: number): Board {
+    return Array.from({ length: height }, () =>
+      Array.from({ length: width }, () =>
         Math.random() > 0.5 ? CellState.Alive : CellState.Dead,
       ),
     );
   }
 
-  private static generateEmptyBoard(size: number): Board {
-    return Array.from({ length: size }, () =>
-      Array.from({ length: size }, () => CellState.Dead),
+  private static generateEmptyBoard(width: number, height: number): Board {
+    return Array.from({ length: height }, () =>
+      Array.from({ length: width }, () => CellState.Dead),
     );
   }
 }

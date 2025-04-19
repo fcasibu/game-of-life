@@ -1,18 +1,47 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Grid } from './lib/core/grid';
-  import { CellState } from './lib/types';
+  import { CellState, type Board } from './lib/types';
 
-  let gridSize = 50;
-  let grid = new Grid(gridSize);
-  let board = grid.getBoard();
+  const CELL_SIZE = 10;
 
-  $: if (gridSize > 0) {
-    grid = new Grid(gridSize);
+  let gridWidth = 0;
+  let gridHeight = 0;
+  let grid: Grid;
+  let board: Board;
+
+  function calculateGridSize() {
+    gridWidth = Math.floor(window.innerWidth / CELL_SIZE);
+    gridHeight = Math.floor(window.innerHeight / CELL_SIZE);
+  }
+
+  function initializeGrid() {
+    calculateGridSize();
+    grid = new Grid(gridWidth, gridHeight);
     board = grid.getBoard();
   }
 
-  $: gridSize = gridSize < 10 ? 10 : gridSize;
+  onMount(() => {
+    initializeGrid();
+
+    const onResize = () => {
+      const newWidth = Math.floor(window.innerWidth / CELL_SIZE);
+      const newHeight = Math.floor(window.innerHeight / CELL_SIZE);
+
+      if (newWidth !== gridWidth || newHeight !== gridHeight) {
+        gridWidth = newWidth;
+        gridHeight = newHeight;
+        grid = new Grid(gridWidth, gridHeight);
+        board = grid.getBoard();
+      }
+    };
+
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  });
 
   let targetFps = 10;
 
@@ -100,13 +129,12 @@
       oninput={changeSpeed}
     />
   </label>
-  <label>
-    Grid Size:
-    <input type="range" min="10" max="100" bind:value={gridSize} />
-  </label>
 </div>
 
-<div class="grid-container" style="--grid-size: {gridSize}">
+<div
+  class="grid-container"
+  style="--grid-width: {gridWidth}; --grid-height: {gridHeight}"
+>
   {#each board as row}
     {#each row as cell}
       <div class="cell" data-state={cellClass(cell)}></div>
@@ -117,20 +145,11 @@
 <style>
   .grid-container {
     display: grid;
-    grid-template-columns: repeat(var(--grid-size), 10px);
-    grid-template-rows: repeat(var(--grid-size), 10px);
-    width: calc(var(--grid-size) * 10px);
-    height: calc(var(--grid-size) * 10px);
-    border: 1px solid #ccc;
-    margin-top: 10px;
+    grid-template-columns: repeat(var(--grid-width), 10px);
+    grid-template-rows: repeat(var(--grid-height), 10px);
   }
 
   .cell {
-    width: 10px;
-    height: 10px;
-    border: 1px solid #eee;
-    box-sizing: border-box;
-
     &[data-state='alive'] {
       background-color: black;
     }
