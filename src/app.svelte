@@ -64,8 +64,7 @@
       accumulator += elapsed;
 
       while (accumulator >= targetFrameTime) {
-        grid.processNextGenerationGrid();
-        board = grid.getBoard();
+        board = grid.processNextGenerationGrid();
         accumulator -= targetFrameTime;
       }
 
@@ -83,11 +82,7 @@
   });
 
   const cellClass = (state: CellState) => {
-    return state === CellState.Alive
-      ? 'alive'
-      : state === CellState.Dead
-        ? 'dead'
-        : 'empty';
+    return state === CellState.Alive ? 'alive' : 'dead';
   };
 
   const togglePause = () => {
@@ -96,8 +91,7 @@
 
   const stepForward = () => {
     if (!isRunning) {
-      grid.processNextGenerationGrid();
-      board = grid.getBoard();
+      board = grid.processNextGenerationGrid();
     }
   };
 

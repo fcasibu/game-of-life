@@ -17,16 +17,16 @@ export class Grid {
     this.board = Grid.generateInitialBoard(width, height);
   }
 
-  public getBoard() {
+  public getBoard(): Board {
     return this.board;
   }
 
-  public resetBoard() {
+  public resetBoard(): Board {
     this.board = Grid.generateInitialBoard(this.width, this.height);
     return this.getBoard();
   }
 
-  public processNextGenerationGrid(): void {
+  public processNextGenerationGrid(): Board {
     const nextGenerationGrid = Grid.generateEmptyBoard(this.width, this.height);
 
     for (let row = 0; row < this.height; ++row) {
@@ -49,6 +49,8 @@ export class Grid {
     }
 
     this.board = nextGenerationGrid;
+
+    return this.board;
   }
 
   private getNewStateOfCell(
@@ -80,8 +82,8 @@ export class Grid {
       assert(typeof x === 'number');
       assert(typeof y === 'number');
 
-      const nextCellX = cellX + x;
-      const nextCellY = cellY + y;
+      const nextCellX = (cellX + x + this.width) % this.width;
+      const nextCellY = (cellY + y + this.height) % this.height;
 
       if (this.isAlive(nextCellX, nextCellY)) {
         count += 1;
@@ -92,12 +94,7 @@ export class Grid {
   }
 
   private isAlive(x: number, y: number): boolean {
-    return this.isWithinBounds(x, y) && this.board[y]![x] === CellState.Alive;
-  }
-
-  // TODO(fcasibu): implement wrapping
-  private isWithinBounds(x: number, y: number) {
-    return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    return this.board[y]![x] === CellState.Alive;
   }
 
   private static generateInitialBoard(width: number, height: number): Board {
