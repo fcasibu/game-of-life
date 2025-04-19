@@ -18,12 +18,25 @@ export class Grid {
   }
 
   public getBoard(): Board {
-    return this.board;
+    return structuredClone(this.board);
   }
 
   public resetBoard(): Board {
     this.board = Grid.generateInitialBoard(this.width, this.height);
     return this.getBoard();
+  }
+
+  public emptyBoard() {
+    this.board = Grid.generateEmptyBoard(this.width, this.height);
+    return this.getBoard();
+  }
+
+  public placeCell(x: number, y: number) {
+    if (x < 0 && x > this.width && y < 0 && y > this.height) {
+      throw new Error('invalid cell position');
+    }
+
+    this.board[y]![x] = CellState.Alive;
   }
 
   public processNextGenerationGrid(): Board {

@@ -18,6 +18,7 @@
   function initializeGrid() {
     calculateGridSize();
     grid = new Grid(gridWidth, gridHeight);
+
     board = grid.getBoard();
   }
 
@@ -44,10 +45,10 @@
   });
 
   let targetFps = 10;
-
-  let targetFrameTime = 1000 / targetFps;
-  let animationFrameId: number | null = null;
   let isRunning = true;
+  let animationFrameId: number | null = null;
+
+  $: targetFrameTime = targetFps > 0 ? 1000 / targetFps : 60;
 
   onMount(() => {
     let lastLogicUpdate = performance.now();
@@ -103,7 +104,16 @@
     const target = event.target as HTMLInputElement;
 
     const fps = parseInt(target.value, 10);
-    targetFrameTime = fps > 0 ? 1000 / fps : Infinity;
+    targetFps = fps;
+  };
+
+  const placeCell = (x: number, y: number) => {
+    grid.placeCell(x, y);
+    board = grid.getBoard();
+  };
+
+  const emptyBoard = () => {
+    board = grid.emptyBoard();
   };
 </script>
 
@@ -113,6 +123,7 @@
   </button>
   <button onclick={stepForward} disabled={isRunning} type="button">Step</button>
   <button onclick={restart} type="button">Restart</button>
+  <button onclick={emptyBoard} type="button">Empty</button>
   <label>
     Speed (Logic Updates/sec):
     <input
@@ -129,9 +140,16 @@
   class="grid-container"
   style="--grid-width: {gridWidth}; --grid-height: {gridHeight}"
 >
-  {#each board as row}
-    {#each row as cell}
-      <div class="cell" data-state={cellClass(cell)}></div>
+  {#each board as row, y}
+    {#each row as cell, x}
+      <button
+        aria-label="Place living cell at {x}, {y}"
+        type="button"
+        class="cell"
+        data-state={cellClass(cell)}
+        onclick={() => placeCell(x, y)}
+        disabled={isRunning}
+      ></button>
     {/each}
   {/each}
 </div>
@@ -144,6 +162,8 @@
   }
 
   .cell {
+    all: unset;
+
     &[data-state='alive'] {
       background-color: black;
     }
