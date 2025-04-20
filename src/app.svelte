@@ -56,6 +56,7 @@
 
     const gameLoop = (currentTime: number) => {
       if (!isRunning) {
+        lastLogicUpdate = currentTime;
         animationFrameId = requestAnimationFrame(gameLoop);
         return;
       }
